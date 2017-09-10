@@ -22,9 +22,8 @@ namespace CoreClient
             {
                 try
                 {
-                    if (_tcpClient != null && _tcpClient.Client != null && _tcpClient.Client.Connected)
-                    {
-                        /* pear to the documentation on Poll:
+                    if (_tcpClient?.Client == null || !_tcpClient.Client.Connected) return false;
+                    /* pear to the documentation on Poll:
                          * When passing SelectMode.SelectRead as a parameter to the Poll method it will return 
                          * -either- true if Socket.Listen(Int32) has been called and a connection is pending;
                          * -or- true if data is available for reading; 
@@ -32,21 +31,10 @@ namespace CoreClient
                          * otherwise, returns false
                          */
 
-                        // Detect if client disconnected
-                        if (_tcpClient.Client.Poll(0, SelectMode.SelectRead))
-                        {
-                            byte[] buff = new byte[1];
-                            if (_tcpClient.Client.Receive(buff, SocketFlags.Peek) == 0)
-                            {
-                                // Client disconnected
-                                return false;
-                            }
-                            return true;
-                        }
-
-                        return true;
-                    }
-                    return false;
+                    // Detect if client disconnected
+                    if (!_tcpClient.Client.Poll(0, SelectMode.SelectRead)) return true;
+                    var buff = new byte[1];
+                    return _tcpClient.Client.Receive(buff, SocketFlags.Peek) != 0;
                 }
                 catch
                 {
@@ -108,7 +96,7 @@ namespace CoreClient
         public async Task CloseAsync()
         {
             await Task.Yield();
-            this.Close();
+            Close();
         }
 
         private void Close()

@@ -12,13 +12,15 @@ namespace CoreClient.HInput
     {
         private TextReader inputReader;
         private TextWriter outputWriter;
-        private HConsoleProcessor hProcessor = new HConsoleProcessor();
+        private HInputProcessor hProcessor = new HInputProcessor();
+        private HClient _hClient;
         public bool Running { get; set; } = false;
 
-        public HConsole()
+        public HConsole(HClient hClient)
         {
             inputReader = Console.In;
             outputWriter = Console.Out;
+            _hClient = hClient;
         }
 
         public async Task StartReadingInputTask()
@@ -29,7 +31,8 @@ namespace CoreClient.HInput
             {
                 var input = await inputReader.ReadLineAsync();
                 var response = await hProcessor.ProcessMessageTask(input);
-                await WriteToConsoleTask(response);
+                await WriteToConsoleTask(response.Type.ToString());
+                await _hClient.SendAync(response);
             }
         }
 
