@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using ChatProtos.Data;
 using ChatProtos.Networking;
 using ChatProtos.Networking.Messages;
+using Google.Protobuf;
 
 namespace CoreClient.HInput
 {
@@ -18,7 +20,8 @@ namespace CoreClient.HInput
                 { "/login", RequestType.Login },
                 { "/logout", RequestType.Logout },
                 { "/join", RequestType.JoinChannel },
-                { "/leave", RequestType.LeaveChannel }
+                { "/leave", RequestType.LeaveChannel },
+                { "/test", RequestType.UserInfo }
             };
         }
 
@@ -39,7 +42,7 @@ namespace CoreClient.HInput
             }
             else
             {
-                requestMessage = await MakeRequestMessageTask(RequestType.ChatMessage, remainingMessage);
+                requestMessage = await MakeRequestMessageTask(RequestType.ChatMessage, message);
             }
             return requestMessage;
         }
@@ -83,6 +86,11 @@ namespace CoreClient.HInput
                         var channelId = message.Split(' ')[0];
                         chatMessage.Text = message.Substring(channelId.Length);
                         realMessage.ChannelId = channelId;
+                        realMessage.Message = new ChatMessage
+                        {
+                            Text = message,
+                            Timestamp = DateTime.Now.ToString()
+                        };
                     }
                     break;
                 case RequestType.BanUser:
@@ -96,6 +104,7 @@ namespace CoreClient.HInput
                 case RequestType.RemoveRole:
                     break;
                 case RequestType.UserInfo:
+                    realMessage.UserId = "asd";
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(requestType), requestType, null);
