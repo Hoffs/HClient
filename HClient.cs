@@ -1,135 +1,64 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ChatProtos.Networking;
 using ChatProtos.Data;
 using ChatProtos.Networking.Messages;
+using CoreClient.HCommands;
 using Google.Protobuf;
 
 namespace CoreClient
 {
     public class HClient
     {
-        private TcpClient _tcpClient;
-        private NetworkStream stream;
+        // TODO: Redesign message handling as chain of responsability to allow receiving response to commands
+        // Either FSM (Finite state machine) or Recursive Handling (command creates and registers another handler after it completes one)
 
-        public bool IsReceiving { set; get; }
+        private readonly HConnection _hConnection;
+        private readonly HCommandManager _commandManager;
 
-        public bool IsConnected()
+        public bool IsAuthenticated { get; set; }
+
+        public HClient(string address, int port)
         {
-            try
-            {
-                if (_tcpClient?.Client == null || !_tcpClient.Client.Connected) return false;
-                if (!_tcpClient.Client.Poll(0, SelectMode.SelectRead)) return true;
-                var buff = new byte[1];
-                return _tcpClient.Client.Receive(buff, SocketFlags.Peek) != 0;
-            }
-            catch
-            {
-                return false;
-            }
+            _hConnection = new HConnection(address, port);
+            _commandManager = new HCommandManager(_hConnection);
         }
 
-        public HClient()
+        public HConnection GetConnection()
         {
-            _tcpClient = new TcpClient();
-            _tcpClient.Client.SetSocketOption(SocketOptionLevel.Socket,
-                SocketOptionName.KeepAlive,
-                true);
+            return _hConnection;
         }
 
-        public async Task Connect(string address, int port)
+        public async Task Connect()
         {
-            try
+            Console.WriteLine("[CLIENT] Connecting client...");
+            await _hConnection.Connect();
+            await _commandManager.ExecuteClientCommand(new LoginCommand(this, "memer", "memer", "meeeeee"));
+        }
+
+        public async Task StartClient()
+        {
+            Console.WriteLine("[CLIENT] Starting client routines");
+            var tasks = new List<Task>();
+            tasks.Add(StartMessageProcessing());
+
+            await Task.WhenAll(tasks);
+        }
+
+        public async Task StartMessageProcessing()
+        {
+            Console.WriteLine("[CLIENT] Starting to read messages");
+            while (_hConnection.IsConnected())
             {
-                Console.WriteLine("[Client] Connecting to server");
-                await _tcpClient.ConnectAsync(address, port);
-                Console.WriteLine("[Client] Finished connecting");
-                // Handle SSL too
-                if (IsConnected()) // Smarter solution for handling correct connection with retries
-                {
-                    stream = _tcpClient.GetStream();
-                    var readingTask = StartReadingTask(stream);
-                    if (readingTask.IsFaulted)
-                        readingTask.Wait();
-                }
+                var message = await _hConnection.ReadMessage();
+                await _commandManager.TryExecutePendingCommands(message);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-        }
-
-        public async Task StartReadingTask(NetworkStream stream)
-        {
-            await Task.Yield();
-            while (IsConnected())
-            {
-                var packetSizeBytes = new byte[4];
-                await stream.ReadAsync(packetSizeBytes, 0, 4);
-                var size = BitConverter.ToInt32(packetSizeBytes, 0);
-
-                var buffer = new byte[size];
-                var byteCount = await stream.ReadAsync(buffer, 0, size);
-
-                if (byteCount <= 0) continue;
-
-                try
-                {
-                    var message = ResponseMessage.Parser.ParseFrom(buffer);
-                    Console.WriteLine("[CLIENT] Server wrote protobuf of type: {0}", message.Type);
-                    if (message.Type == RequestType.ChatMessage)
-                    {
-                        var chat = ChatMessageResponse.Parser.ParseFrom(message.Message);
-                        Console.WriteLine("[CHAT_MESSAGE] " + chat.Message.Text);
-                    }
-                    // await _messageProcessor.ProcessMessage(message, hClient);
-                    // Console.WriteLine("[SERVER] Processed message from Client {0}", hClient.GetDisplayName());
-                }
-                catch (InvalidProtocolBufferException e)
-                {
-                    Console.WriteLine(e);
-                    Console.WriteLine("Couldn't parse protobuf");
-                }
-            }
-        }
-
-        public async Task SendAync(RequestMessage message)
-        {
-            try
-            {
-                var messageBytes = message.ToByteArray();
-                Console.WriteLine("[Client] Starting to send message with length {0}", messageBytes.Length);
-                var packet = new byte[4 + messageBytes.Length];
-                System.Buffer.BlockCopy(BitConverter.GetBytes(messageBytes.Length), 0, packet, 0, 4);
-                System.Buffer.BlockCopy(messageBytes, 0, packet, 4, messageBytes.Length);
-
-                await stream.WriteAsync(packet, 0, packet.Length); // Cancelation token?
-                await stream.FlushAsync();
-
-                Console.WriteLine("[Client] Finished sending");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-        }
-
-        public async Task CloseAsync()
-        {
-            await Task.Yield();
-            Close();
-        }
-
-        private void Close()
-        {
-            _tcpClient?.Dispose();
-            stream?.Dispose();
-        }
+        } 
     }
 }

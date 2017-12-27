@@ -32,7 +32,7 @@ namespace CoreClient.HInput
                 var input = await inputReader.ReadLineAsync();
                 var response = await hProcessor.ProcessMessageTask(input);
                 await WriteToConsoleTask(response.Type.ToString());
-                await _hClient.SendAync(response);
+                await _hClient.GetConnection().SendAync(response);
             }
         }
 
