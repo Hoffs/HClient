@@ -16,13 +16,12 @@ namespace CoreClient
 {
     public class HClient
     {
-        // TODO: Redesign message handling as chain of responsability to allow receiving response to commands
-        // Either FSM (Finite state machine) or Recursive Handling (command creates and registers another handler after it completes one)
+        // TODO: Rework command manager to be based on EventHandler's
 
         private readonly HConnection _hConnection;
         private readonly HCommandManager _commandManager;
 
-        public bool IsAuthenticated { get; set; }
+        public bool IsAuthenticated { get; set; } = false;
 
         public HClient(string address, int port)
         {
@@ -33,6 +32,11 @@ namespace CoreClient
         public HConnection GetConnection()
         {
             return _hConnection;
+        }
+
+        public HCommandManager GetCommandManager()
+        {
+            return _commandManager;
         }
 
         public async Task Connect()

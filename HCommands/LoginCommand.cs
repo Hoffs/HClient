@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using ChatProtos.Networking;
 using ChatProtos.Networking.Messages;
 using Google.Protobuf;
@@ -19,8 +20,8 @@ namespace CoreClient.HCommands
             _password = password;
             _token = token;
         }
-
-        public async Task Execute(HCommandManager manager, HConnection connection)
+        
+        public async Task Execute(Action<IMessageHandler> addPending, HConnection connection)
         {
             var message = new RequestMessage
             {
@@ -33,8 +34,8 @@ namespace CoreClient.HCommands
                 }.ToByteString()
             };
             await connection.SendAync(message);
-            var pending = new LoginConfirmCommand(_client);
-            manager.AddPendingCommand(pending);
+            var pending = new LoginConfirmHandler(_client);
+            addPending?.Invoke(pending);
         }
     }
 }
