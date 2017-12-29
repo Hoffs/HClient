@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Threading.Tasks;
 using ChatProtos.Networking;
+using CoreClient.HAttributes;
 
 namespace CoreClient.HCommands
 {
-    public class LoginConfirmCommand : IPendingCommand
+    [HCommandSignature(RequestType.Login)]
+    public class LoginConfirmHandler : IMessageHandler
     {
         private readonly HClient _client;
         private bool _isFinished = false;
 
-        public LoginConfirmCommand(HClient client)
+        public LoginConfirmHandler(HClient client)
         {
             _client = client;
         }
 
-        public async Task Execute(HCommandManager manager, HConnection connection, ResponseMessage message)
+        public async Task Execute(Action<IMessageHandler> addHandler, HConnection connection, ResponseMessage message)
         {
             if (message.Status != ResponseStatus.Success) return;
             _client.IsAuthenticated = true;
@@ -25,11 +27,6 @@ namespace CoreClient.HCommands
         public bool IsFinished()
         {
             return _isFinished;
-        }
-
-        public RequestType GetRequiredType()
-        {
-            return RequestType.Login;
         }
     }
 }
