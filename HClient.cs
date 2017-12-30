@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Sockets;
-using System.Reflection;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using ChatProtos.Networking;
-using ChatProtos.Data;
 using ChatProtos.Networking.Messages;
 using CoreClient.HCommands;
-using Google.Protobuf;
+using CoreClient.HMessageArgs;
 
 namespace CoreClient
 {
@@ -20,6 +14,7 @@ namespace CoreClient
 
         private readonly HConnection _hConnection;
         private readonly HCommandManager _commandManager;
+        public HEvents EventHandlers { get; } = new HEvents();
 
         public bool IsAuthenticated { get; set; } = false;
 
@@ -27,6 +22,7 @@ namespace CoreClient
         {
             _hConnection = new HConnection(address, port);
             _commandManager = new HCommandManager(_hConnection);
+            HEvents.RegisterDefaultHandlers(EventHandlers);
         }
 
         public HConnection GetConnection()
@@ -43,7 +39,7 @@ namespace CoreClient
         {
             Console.WriteLine("[CLIENT] Connecting client...");
             await _hConnection.Connect();
-            await _commandManager.ExecuteClientCommand(new LoginCommand(this, "memer", "memer", "meeeeee"));
+            await _commandManager.ExecuteClientCommand(new LoginCommand(this, "user", "pass", "token"));
         }
 
         public async Task StartClient()
@@ -61,7 +57,11 @@ namespace CoreClient
             while (_hConnection.IsConnected())
             {
                 var message = await _hConnection.ReadMessage();
-                await _commandManager.TryExecutePendingCommands(message);
+                Console.WriteLine("Type : {0}", message.Type);
+                if (message.Type == RequestType.Login)
+                {
+                    EventHandlers.OnLoginEventHandler(new LoginArgs(_hConnection, EventHandlers, message.Status, LoginMessageResponse.Parser.ParseFrom(message.Message)));
+                }
             }
         } 
     }

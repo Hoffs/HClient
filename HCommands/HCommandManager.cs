@@ -28,22 +28,20 @@ namespace CoreClient.HCommands
             }
         }
 
-        private void RemoveFinishedCommands(IEnumerable<IMessageHandler> commands)
+        private void RemoveFinishedCommands()
         {
             lock (_lock)
             {
-                foreach (var finishedCommand in commands.Where(command => command.IsFinished())) 
-                    _messageHandlers.Remove(finishedCommand);
+                _messageHandlers.RemoveAll(handler => handler.IsFinished());
             }
         }
 
         public async Task TryExecutePendingCommands(ResponseMessage message)
         {
             IEnumerable<Task> tasks;
-            IEnumerable<IMessageHandler> commands;
             lock (_lock)
             {
-                commands = _messageHandlers.Where(command =>
+                var commands = _messageHandlers.Where(command =>
                 {
                     var attr = command.GetType().GetTypeInfo().GetCustomAttribute<HCommandSignatureAttribute>();
                     return attr?.GetRequestType() != null && message?.Type == attr.GetRequestType();
@@ -51,7 +49,7 @@ namespace CoreClient.HCommands
                 tasks = commands.Select(async command => await command.Execute(AddPendingCommand, _hConnection, message));
             }
             await Task.WhenAll(tasks);
-            RemoveFinishedCommands(commands);
+            RemoveFinishedCommands();
         }
 
         public async Task ExecuteClientCommand(IClientCommand command)
