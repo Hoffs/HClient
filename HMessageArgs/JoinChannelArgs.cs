@@ -8,13 +8,13 @@ namespace CoreClient.HMessageArgs
     {
         public JoinChannelMessageResponse Message { get; }
         public ResponseStatus Status { get; }
-        public HEvents Handlers { get; }
+        public HEvents Events { get; }
         public HConnection Connection { get; }
 
-        public JoinChannelArgs(HConnection connection, HEvents handlers, ResponseStatus status, JoinChannelMessageResponse message)
+        public JoinChannelArgs(HConnection connection, HEvents events, ResponseStatus status, JoinChannelMessageResponse message)
         {
             Connection = connection;
-            Handlers = handlers;
+            Events = events;
             Status = status;
             Message = message;
         }

@@ -8,13 +8,13 @@ namespace CoreClient.HMessageArgs
     {
         public LogoutMessageResponse Message { get; }
         public ResponseStatus Status { get; }
-        public HEvents Handlers { get; }
+        public HEvents Events { get; }
         public HConnection Connection { get; }
 
-        public LogoutArgs(HConnection connection, HEvents handlers, ResponseStatus status, LogoutMessageResponse message)
+        public LogoutArgs(HConnection connection, HEvents events, ResponseStatus status, LogoutMessageResponse message)
         {
             Connection = connection;
-            Handlers = handlers;
+            Events = events;
             Status = status;
             Message = message;
         }

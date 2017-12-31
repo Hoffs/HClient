@@ -7,14 +7,14 @@ namespace CoreClient.HMessageArgs
     public class AddRoleArgs : EventArgs
     {
         public HConnection Connection { get; }
-        public HEvents Handlers { get; }
+        public HEvents Events { get; }
         public ResponseStatus Status { get; }
         public AddRoleMessageResponse Message { get; }
 
-        public AddRoleArgs(HConnection connection, HEvents handlers, ResponseStatus status, AddRoleMessageResponse message)
+        public AddRoleArgs(HConnection connection, HEvents events, ResponseStatus status, AddRoleMessageResponse message)
         {
             Connection = connection;
-            Handlers = handlers;
+            Events = events;
             Status = status;
             Message = message;
         }

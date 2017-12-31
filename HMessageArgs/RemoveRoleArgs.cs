@@ -7,14 +7,14 @@ namespace CoreClient.HMessageArgs
     public class RemoveRoleArgs : EventArgs
     {
         public HConnection Connection { get; }
-        public HEvents Handlers { get; }
+        public HEvents Events { get; }
         public ResponseStatus Status { get; }
         public RemoveRoleMessageResponse Message { get; }
 
-        public RemoveRoleArgs(HConnection connection, HEvents handlers, ResponseStatus status, RemoveRoleMessageResponse message)
+        public RemoveRoleArgs(HConnection connection, HEvents events, ResponseStatus status, RemoveRoleMessageResponse message)
         {
             Connection = connection;
-            Handlers = handlers;
+            Events = events;
             Status = status;
             Message = message;
         }

@@ -7,14 +7,14 @@ namespace CoreClient.HMessageArgs
     public class BanUserArgs : EventArgs
     {
         public HConnection Connection { get; }
-        public HEvents Handlers { get; }
+        public HEvents Events { get; }
         public ResponseStatus Status { get; }
         public BanUserMessageResponse Message { get; }
 
-        public BanUserArgs(HConnection connection, HEvents handlers, ResponseStatus status, BanUserMessageResponse message)
+        public BanUserArgs(HConnection connection, HEvents events, ResponseStatus status, BanUserMessageResponse message)
         {
             Connection = connection;
-            Handlers = handlers;
+            Events = events;
             Status = status;
             Message = message;
         }
