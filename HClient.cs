@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using ChatProtos.Networking;
 using ChatProtos.Networking.Messages;
@@ -11,18 +12,17 @@ namespace CoreClient
     public class HClient
     {
         // TODO: Rework command manager to be based on EventHandler's
-
+        // TODO: Use blocking collections
         private readonly HConnection _hConnection;
-        private readonly HCommandManager _commandManager;
-        public HEvents EventHandlers { get; } = new HEvents();
+        public HEvents Events { get; } = new HEvents();
 
         public bool IsAuthenticated { get; set; } = false;
+        public bool IsRunning { get; set; } = false;
 
         public HClient(string address, int port)
         {
             _hConnection = new HConnection(address, port);
-            _commandManager = new HCommandManager(_hConnection);
-            HEvents.RegisterDefaultHandlers(EventHandlers);
+            HEvents.RegisterDefaultHandlers(Events);
         }
 
         public HConnection GetConnection()
@@ -30,39 +30,57 @@ namespace CoreClient
             return _hConnection;
         }
 
-        public HCommandManager GetCommandManager()
-        {
-            return _commandManager;
-        }
-
         public async Task Connect()
         {
             Console.WriteLine("[CLIENT] Connecting client...");
             await _hConnection.Connect();
-            await _commandManager.ExecuteClientCommand(new LoginCommand(this, "user", "pass", "token"));
         }
 
         public async Task StartClient()
         {
             Console.WriteLine("[CLIENT] Starting client routines");
+            IsRunning = true;
             var tasks = new List<Task>();
             tasks.Add(StartMessageProcessing());
-
             await Task.WhenAll(tasks);
         }
 
         public async Task StartMessageProcessing()
         {
             Console.WriteLine("[CLIENT] Starting to read messages");
-            while (_hConnection.IsConnected())
+            while (_hConnection.IsConnected() || IsRunning)
             {
-                var message = await _hConnection.ReadMessage();
-                Console.WriteLine("Type : {0}", message.Type);
-                if (message.Type == RequestType.Login)
+                try
                 {
-                    EventHandlers.OnLoginEventHandler(new LoginArgs(_hConnection, EventHandlers, message.Status, LoginMessageResponse.Parser.ParseFrom(message.Message)));
+                    var message = await _hConnection.ReadMessage();
+                    Events.InvokeEvent(this, message);
+                }
+                catch (IOException ex)
+                {
+                    Console.WriteLine("[CLIENT] Connection might have dropped.");
+                    if (!IsRunning) break;
+                    Console.WriteLine("[CLIENT] Trying to reconnect.");
+                    await Connect();
                 }
             }
-        } 
+        }
+
+        public async Task ExecuteCommandTask(IClientCommand command)
+        {
+            await command.Execute(Events, _hConnection);
+        }
+
+        public async Task CloseAsync()
+        {
+            await Task.Yield();
+            IsRunning = false;
+            Close();
+        }
+
+        private void Close()
+        {
+            _hConnection?.CloseTask();
+            IsAuthenticated = false;
+        }
     }
 }

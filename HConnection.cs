@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ChatProtos.Networking;
 using ChatProtos.Networking.Messages;
 using Google.Protobuf;
+using JetBrains.Annotations;
 
 namespace CoreClient
 {
@@ -64,6 +65,7 @@ namespace CoreClient
             }
         }
 
+        [NotNull]
         public async Task<ResponseMessage> ReadMessage()
         {
             await Task.Yield(); // Forces Async
@@ -91,7 +93,7 @@ namespace CoreClient
             return message;
         }
 
-        public async Task SendAync(RequestMessage message)
+        public async Task SendAync([NotNull] RequestMessage message)
         {
             try
             {
@@ -111,7 +113,7 @@ namespace CoreClient
             }
         }
 
-        public async Task CloseAsync()
+        public async Task CloseTask()
         {
             await Task.Yield();
             Close();

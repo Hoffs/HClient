@@ -5,6 +5,6 @@ namespace CoreClient.HCommands
 {
     public interface IClientCommand
     {
-        Task Execute(Action<IMessageHandler> addPending, HConnection hConnection);
+        Task Execute(HEvents events, HConnection hConnection);
     }
 }

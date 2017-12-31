@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using ChatProtos.Networking;
 using ChatProtos.Networking.Messages;
+using CoreClient.HMessageArgs;
 using Google.Protobuf;
+using JetBrains.Annotations;
 
 namespace CoreClient.HCommands
 {
@@ -21,7 +23,7 @@ namespace CoreClient.HCommands
             _token = token;
         }
         
-        public async Task Execute(Action<IMessageHandler> addPending, HConnection connection)
+        public async Task Execute(HEvents events, HConnection connection)
         {
             var message = new RequestMessage
             {
@@ -34,8 +36,15 @@ namespace CoreClient.HCommands
                 }.ToByteString()
             };
             await connection.SendAync(message);
-            var pending = new LoginConfirmHandler(_client);
-            addPending?.Invoke(pending);
+            events.LoginEventHandler += OnLoginConfirm;
+        }
+
+        public async void OnLoginConfirm([NotNull] object sender, [NotNull] LoginArgs args)
+        {
+            await Task.Yield();
+            if (args.Status != ResponseStatus.Success) return;
+            _client.IsAuthenticated = true;
+            args.Events.LoginEventHandler -= OnLoginConfirm;
         }
     }
 }
