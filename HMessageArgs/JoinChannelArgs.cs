@@ -1,17 +1,17 @@
 ﻿using System;
-using ChatProtos.Networking;
-using ChatProtos.Networking.Messages;
+using HChatClient.ChatProtos.Networking;
+using HChatClient.ChatProtos.Networking.Messages;
 
-namespace CoreClient.HMessageArgs
+namespace HChatClient.HMessageArgs
 {
     public class JoinChannelArgs : EventArgs
     {
         public JoinChannelMessageResponse Message { get; }
         public ResponseStatus Status { get; }
-        public HEvents Events { get; }
+        public HChatEvents Events { get; }
         public HConnection Connection { get; }
 
-        public JoinChannelArgs(HConnection connection, HEvents events, ResponseStatus status, JoinChannelMessageResponse message)
+        public JoinChannelArgs(HConnection connection, HChatEvents events, ResponseStatus status, JoinChannelMessageResponse message)
         {
             Connection = connection;
             Events = events;

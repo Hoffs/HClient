@@ -1,17 +1,17 @@
 ﻿using System;
-using ChatProtos.Networking;
-using ChatProtos.Networking.Messages;
+using HChatClient.ChatProtos.Networking;
+using HChatClient.ChatProtos.Networking.Messages;
 
-namespace CoreClient.HMessageArgs
+namespace HChatClient.HMessageArgs
 {
     public class UserInfoArgs : EventArgs
     {
         public HConnection Connection { get; }
-        public HEvents Events { get; }
+        public HChatEvents Events { get; }
         public ResponseStatus Status { get; }
         public UserInfoMessageResponse Message { get; }
 
-        public UserInfoArgs(HConnection connection, HEvents events, ResponseStatus status, UserInfoMessageResponse message)
+        public UserInfoArgs(HConnection connection, HChatEvents events, ResponseStatus status, UserInfoMessageResponse message)
         {
             Connection = connection;
             Events = events;

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using ChatProtos.Networking;
-using ChatProtos.Networking.Messages;
-using CoreClient.HMessageArgs;
+﻿using System.Threading.Tasks;
 using Google.Protobuf;
+using HChatClient.ChatProtos.Networking;
+using HChatClient.ChatProtos.Networking.Messages;
+using HChatClient.HMessageArgs;
 using JetBrains.Annotations;
 
-namespace CoreClient.HCommands
+namespace HChatClient.HCommands
 {
     public class LoginCommand : IClientCommand
     {
@@ -23,7 +22,7 @@ namespace CoreClient.HCommands
             _token = token;
         }
         
-        public async Task Execute(HEvents events, HConnection connection)
+        public async Task Execute(HChatEvents events, HConnection connection)
         {
             var message = new RequestMessage
             {
@@ -35,7 +34,7 @@ namespace CoreClient.HCommands
                     Token = _token
                 }.ToByteString()
             };
-            await connection.SendAync(message);
+            await connection.SendAyncTask(message.ToByteArray());
             events.LoginEventHandler += OnLoginConfirm;
         }
 

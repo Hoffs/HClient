@@ -1,17 +1,17 @@
 ﻿using System;
-using ChatProtos.Networking;
-using ChatProtos.Networking.Messages;
+using HChatClient.ChatProtos.Networking;
+using HChatClient.ChatProtos.Networking.Messages;
 
-namespace CoreClient.HMessageArgs
+namespace HChatClient.HMessageArgs
 {
     public class KickUserArgs : EventArgs
     {
         public HConnection Connection { get; }
-        public HEvents Events { get; }
+        public HChatEvents Events { get; }
         public ResponseStatus Status { get; }
         public KickUserMessageResponse Message { get; }
 
-        public KickUserArgs(HConnection connection, HEvents events, ResponseStatus status, KickUserMessageResponse message)
+        public KickUserArgs(HConnection connection, HChatEvents events, ResponseStatus status, KickUserMessageResponse message)
         {
             Connection = connection;
             Events = events;

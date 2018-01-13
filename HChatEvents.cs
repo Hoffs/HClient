@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using ChatProtos.Networking;
-using ChatProtos.Networking.Messages;
-using CoreClient.HEventHandlers;
-using CoreClient.HMessageArgs;
 using Google.Protobuf;
+using HChatClient.ChatProtos.Networking;
+using HChatClient.ChatProtos.Networking.Messages;
+using HChatClient.HMessageArgs;
 using JetBrains.Annotations;
 
-namespace CoreClient
+namespace HChatClient
 {
-    public class HEvents
+    public class HChatEvents
     {
         public event EventHandler<LoginArgs> LoginEventHandler;
         public event EventHandler<LogoutArgs> LogoutEventHandler;
@@ -27,57 +22,59 @@ namespace CoreClient
         public event EventHandler<KickUserArgs> KickUserEventHandler;
         public event EventHandler<ChatMessageArgs> ChatMessagEventHandler;
 
-        // Could maybe be async for speed?
-        public void InvokeEvent([NotNull] HClient client, [NotNull] ResponseMessage message)
+        public async Task InvokeEvent([NotNull] HClient client, [NotNull] byte[] message)
         {
+            await Task.Yield();
             try
             {
-                switch (message.Type)
+                var responseMessage = ResponseMessage.Parser.ParseFrom(message);
+                switch (responseMessage.Type)
                 {
                     case RequestType.Login:
-                        var login = LoginMessageResponse.Parser.ParseFrom(message.Message);
-                        OnLoginEventHandler(new LoginArgs(client.GetConnection(), this, message.Status, login));
+                        var login = LoginMessageResponse.Parser.ParseFrom(responseMessage.Message);
+                        OnLoginEventHandler(new LoginArgs(client.GetConnection(), this, responseMessage.Status, login));
                         break;
                     case RequestType.Logout:
-                        var logout = LogoutMessageResponse.Parser.ParseFrom(message.Message);
-                        OnLogoutEventHandler(new LogoutArgs(client.GetConnection(), this, message.Status, logout));
+                        var logout = LogoutMessageResponse.Parser.ParseFrom(responseMessage.Message);
+                        OnLogoutEventHandler(new LogoutArgs(client.GetConnection(), this, responseMessage.Status, logout));
                         break;
                     case RequestType.JoinChannel:
-                        var joinChannel = JoinChannelMessageResponse.Parser.ParseFrom(message.Message);
-                        OnJoinChannelEventHandler(new JoinChannelArgs(client.GetConnection(), this, message.Status,
+                        Console.WriteLine("[CLIENT] Handler count: {0}", JoinChannelEventHandler?.GetInvocationList().Length);
+                        var joinChannel = JoinChannelMessageResponse.Parser.ParseFrom(responseMessage.Message);
+                        OnJoinChannelEventHandler(new JoinChannelArgs(client.GetConnection(), this, responseMessage.Status,
                             joinChannel));
                         break;
                     case RequestType.LeaveChannel:
-                        var leaveChannel = LeaveChannelMessageResponse.Parser.ParseFrom(message.Message);
-                        OnLeaveChannelEventHandler(new LeaveChannelArgs(client.GetConnection(), this, message.Status,
+                        var leaveChannel = LeaveChannelMessageResponse.Parser.ParseFrom(responseMessage.Message);
+                        OnLeaveChannelEventHandler(new LeaveChannelArgs(client.GetConnection(), this, responseMessage.Status,
                             leaveChannel));
                         break;
                     case RequestType.BanUser:
-                        var banUser = BanUserMessageResponse.Parser.ParseFrom(message.Message);
-                        OnBanUserEventHandler(new BanUserArgs(client.GetConnection(), this, message.Status, banUser));
+                        var banUser = BanUserMessageResponse.Parser.ParseFrom(responseMessage.Message);
+                        OnBanUserEventHandler(new BanUserArgs(client.GetConnection(), this, responseMessage.Status, banUser));
                         break;
                     case RequestType.KickUser:
-                        var kickUser = KickUserMessageResponse.Parser.ParseFrom(message.Message);
-                        OnKickUserEventHandler(new KickUserArgs(client.GetConnection(), this, message.Status,
+                        var kickUser = KickUserMessageResponse.Parser.ParseFrom(responseMessage.Message);
+                        OnKickUserEventHandler(new KickUserArgs(client.GetConnection(), this, responseMessage.Status,
                             kickUser));
                         break;
                     case RequestType.AddRole:
-                        var addRole = AddRoleMessageResponse.Parser.ParseFrom(message.Message);
-                        OnAddRoleEventHandler(new AddRoleArgs(client.GetConnection(), this, message.Status, addRole));
+                        var addRole = AddRoleMessageResponse.Parser.ParseFrom(responseMessage.Message);
+                        OnAddRoleEventHandler(new AddRoleArgs(client.GetConnection(), this, responseMessage.Status, addRole));
                         break;
                     case RequestType.RemoveRole:
-                        var removeRole = RemoveRoleMessageResponse.Parser.ParseFrom(message.Message);
-                        OnRemoveRoleEventHandler(new RemoveRoleArgs(client.GetConnection(), this, message.Status,
+                        var removeRole = RemoveRoleMessageResponse.Parser.ParseFrom(responseMessage.Message);
+                        OnRemoveRoleEventHandler(new RemoveRoleArgs(client.GetConnection(), this, responseMessage.Status,
                             removeRole));
                         break;
                     case RequestType.UpdateDisplayName:
-                        var updateDisplayName = UpdateDisplayMessageResponse.Parser.ParseFrom(message.Message);
+                        var updateDisplayName = UpdateDisplayMessageResponse.Parser.ParseFrom(responseMessage.Message);
                         OnUpdateDisplayNamEventHandler(new UpdateDisplayNameArgs(client.GetConnection(), this,
-                            message.Status, updateDisplayName));
+                            responseMessage.Status, updateDisplayName));
                         break;
                     case RequestType.UserInfo:
-                        var userInfo = UserInfoMessageResponse.Parser.ParseFrom(message.Message);
-                        OnUserInfoEventHandler(new UserInfoArgs(client.GetConnection(), this, message.Status,
+                        var userInfo = UserInfoMessageResponse.Parser.ParseFrom(responseMessage.Message);
+                        OnUserInfoEventHandler(new UserInfoArgs(client.GetConnection(), this, responseMessage.Status,
                             userInfo));
                         break;
                     case RequestType.ChatMessage:
@@ -97,12 +94,6 @@ namespace CoreClient
                 Console.WriteLine(ex);
             }
 
-        }
-
-        public static void RegisterDefaultHandlers(HEvents events)
-        {
-            var defaultHandlers = new HDefaultHandlers();
-            defaultHandlers.RegisterHandlers(events);
         }
 
         protected virtual void OnLoginEventHandler(LoginArgs e)

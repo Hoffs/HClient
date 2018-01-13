@@ -1,17 +1,17 @@
 ﻿using System;
-using ChatProtos.Networking;
-using ChatProtos.Networking.Messages;
+using HChatClient.ChatProtos.Networking;
+using HChatClient.ChatProtos.Networking.Messages;
 
-namespace CoreClient.HMessageArgs
+namespace HChatClient.HMessageArgs
 {
     public class RemoveRoleArgs : EventArgs
     {
         public HConnection Connection { get; }
-        public HEvents Events { get; }
+        public HChatEvents Events { get; }
         public ResponseStatus Status { get; }
         public RemoveRoleMessageResponse Message { get; }
 
-        public RemoveRoleArgs(HConnection connection, HEvents events, ResponseStatus status, RemoveRoleMessageResponse message)
+        public RemoveRoleArgs(HConnection connection, HChatEvents events, ResponseStatus status, RemoveRoleMessageResponse message)
         {
             Connection = connection;
             Events = events;

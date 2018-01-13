@@ -1,17 +1,17 @@
 ﻿using System;
-using ChatProtos.Networking;
-using ChatProtos.Networking.Messages;
+using HChatClient.ChatProtos.Networking;
+using HChatClient.ChatProtos.Networking.Messages;
 
-namespace CoreClient.HMessageArgs
+namespace HChatClient.HMessageArgs
 {
     public class AddRoleArgs : EventArgs
     {
         public HConnection Connection { get; }
-        public HEvents Events { get; }
+        public HChatEvents Events { get; }
         public ResponseStatus Status { get; }
         public AddRoleMessageResponse Message { get; }
 
-        public AddRoleArgs(HConnection connection, HEvents events, ResponseStatus status, AddRoleMessageResponse message)
+        public AddRoleArgs(HConnection connection, HChatEvents events, ResponseStatus status, AddRoleMessageResponse message)
         {
             Connection = connection;
             Events = events;

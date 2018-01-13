@@ -1,17 +1,17 @@
 ﻿using System;
-using ChatProtos.Networking;
-using ChatProtos.Networking.Messages;
+using HChatClient.ChatProtos.Networking;
+using HChatClient.ChatProtos.Networking.Messages;
 
-namespace CoreClient.HMessageArgs
+namespace HChatClient.HMessageArgs
 {
     public class BanUserArgs : EventArgs
     {
         public HConnection Connection { get; }
-        public HEvents Events { get; }
+        public HChatEvents Events { get; }
         public ResponseStatus Status { get; }
         public BanUserMessageResponse Message { get; }
 
-        public BanUserArgs(HConnection connection, HEvents events, ResponseStatus status, BanUserMessageResponse message)
+        public BanUserArgs(HConnection connection, HChatEvents events, ResponseStatus status, BanUserMessageResponse message)
         {
             Connection = connection;
             Events = events;

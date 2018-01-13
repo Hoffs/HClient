@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using ChatProtos.Networking;
-using ChatProtos.Networking.Messages;
-using Google.Protobuf;
 using JetBrains.Annotations;
 
-namespace CoreClient
+namespace HChatClient
 {
     public class HConnection
     {
         private readonly TcpClient _tcpClient;
         private NetworkStream _stream;
 
-        private string _ip;
-        private int _port;
+        private readonly string _ip;
+        private readonly int _port;
 
         public HConnection(string ip, int port)
         {
@@ -48,14 +45,10 @@ namespace CoreClient
                 Console.WriteLine("[Client] Connecting to server");
                 await _tcpClient.ConnectAsync(_ip, _port);
                 Console.WriteLine("[Client] Finished connecting");
-                // Handle SSL too
+                // TODO: Handle SSL too
                 if (IsConnected()) // Smarter solution for handling correct connection with retries
                 {
                     _stream = _tcpClient.GetStream();
-                    /*
-                    var readingTask = StartReadingTask(_stream);
-                    if (readingTask.IsFaulted)
-                        readingTask.Wait();*/
                 }
             }
             catch (Exception e)
@@ -65,52 +58,35 @@ namespace CoreClient
             }
         }
 
-        [NotNull]
-        public async Task<ResponseMessage> ReadMessage()
+        /// <summary>
+        /// Reads messages from the server.
+        /// </summary>
+        /// <returns>Byte array of message</returns>
+        [ItemCanBeNull]
+        public async Task<byte[]> ReadMessageTask()
         {
-            await Task.Yield(); // Forces Async
-            ResponseMessage message = null;
+            await Task.Yield();
             var packetSizeBytes = new byte[4];
             await _stream.ReadAsync(packetSizeBytes, 0, 4);
-            
             var size = BitConverter.ToInt32(packetSizeBytes, 0);
-
             var buffer = new byte[size];
             var byteCount = await _stream.ReadAsync(buffer, 0, size);
-
-            if (byteCount <= 0) return null;
-
-            try
-            {
-                message = ResponseMessage.Parser.ParseFrom(buffer);
-            }
-            catch (InvalidProtocolBufferException e)
-            {
-                Console.WriteLine(e);
-                Console.WriteLine("Couldn't parse protobuf");
-            }
-
-            return message;
+            return byteCount <= 0 ? null : buffer;
         }
 
-        public async Task SendAync([NotNull] RequestMessage message)
+        /// <summary>
+        /// Sends the byte array of the message with 4 bytes specifying length
+        /// </summary>
+        /// <param name="message">Byte array of message contents</param>
+        /// <returns></returns>
+        public async Task SendAyncTask([NotNull] byte[] message)
         {
-            try
-            {
-                var messageBytes = message.ToByteArray();
-                Console.WriteLine("[Client] Starting to send message with length {0}", messageBytes.Length);
-                var packet = new byte[4 + messageBytes.Length];
-                Buffer.BlockCopy(BitConverter.GetBytes(messageBytes.Length), 0, packet, 0, 4);
-                Buffer.BlockCopy(messageBytes, 0, packet, 4, messageBytes.Length);
-                await _stream.WriteAsync(packet, 0, packet.Length); // Cancelation token?
-                await _stream.FlushAsync();
-                Console.WriteLine("[Client] Finished sending");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            var packet = new byte[4 + message.Length];
+            Buffer.BlockCopy(BitConverter.GetBytes(message.Length), 0, packet, 0, 4);
+            Buffer.BlockCopy(message, 0, packet, 4, message.Length);
+            await _stream.WriteAsync(packet, 0, packet.Length); // Cancelation token?
+            await _stream.FlushAsync();
+            Console.WriteLine("[Client] Finished sending");
         }
 
         public async Task CloseTask()

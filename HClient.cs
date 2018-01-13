@@ -1,28 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using ChatProtos.Networking;
-using ChatProtos.Networking.Messages;
-using CoreClient.HCommands;
-using CoreClient.HMessageArgs;
+using HChatClient.HCommands;
 
-namespace CoreClient
+namespace HChatClient
 {
     public class HClient
     {
-        // TODO: Rework command manager to be based on EventHandler's
-        // TODO: Use blocking collections
-        private readonly HConnection _hConnection;
-        public HEvents Events { get; } = new HEvents();
-
         public bool IsAuthenticated { get; set; } = false;
         public bool IsRunning { get; set; } = false;
+        public HChatEvents Events { get; } = new HChatEvents();
+        private readonly HConnection _hConnection;
 
         public HClient(string address, int port)
         {
             _hConnection = new HConnection(address, port);
-            HEvents.RegisterDefaultHandlers(Events);
         }
 
         public HConnection GetConnection()
@@ -32,7 +24,6 @@ namespace CoreClient
 
         public async Task Connect()
         {
-            Console.WriteLine("[CLIENT] Connecting client...");
             await _hConnection.Connect();
         }
 
@@ -40,9 +31,7 @@ namespace CoreClient
         {
             Console.WriteLine("[CLIENT] Starting client routines");
             IsRunning = true;
-            var tasks = new List<Task>();
-            tasks.Add(StartMessageProcessing());
-            await Task.WhenAll(tasks);
+            await StartMessageProcessing();
         }
 
         public async Task StartMessageProcessing()
@@ -52,10 +41,13 @@ namespace CoreClient
             {
                 try
                 {
-                    var message = await _hConnection.ReadMessage();
-                    Events.InvokeEvent(this, message);
+                    var message = await _hConnection.ReadMessageTask();
+                    if (message != null)
+                    {
+                        await Events.InvokeEvent(this, message);
+                    }
                 }
-                catch (IOException ex)
+                catch (IOException)
                 {
                     Console.WriteLine("[CLIENT] Connection might have dropped.");
                     if (!IsRunning) break;
@@ -64,7 +56,7 @@ namespace CoreClient
                 }
             }
         }
-
+        
         public async Task ExecuteCommandTask(IClientCommand command)
         {
             await command.Execute(Events, _hConnection);

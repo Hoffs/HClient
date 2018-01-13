@@ -1,10 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace CoreClient.HCommands
+namespace HChatClient.HCommands
 {
     public interface IClientCommand
     {
-        Task Execute(HEvents events, HConnection hConnection);
+        Task Execute(HChatEvents events, HConnection hConnection);
     }
 }
