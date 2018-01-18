@@ -1,8 +1,9 @@
 ﻿using System.Threading.Tasks;
+using ChatProtos.Networking;
+using ChatProtos.Networking.Messages;
 using Google.Protobuf;
-using HChatClient.ChatProtos.Networking;
-using HChatClient.ChatProtos.Networking.Messages;
 using HChatClient.HMessageArgs;
+using HServer.Networking;
 using JetBrains.Annotations;
 
 namespace HChatClient.HCommands
@@ -26,8 +27,8 @@ namespace HChatClient.HCommands
         {
             var message = new RequestMessage
             {
-                Type = RequestType.Login,
-                Message = new LoginMessageRequest
+                Type = (int)RequestType.Login,
+                Message = new LoginRequest
                 {
                     Username = _username,
                     Password = _password,

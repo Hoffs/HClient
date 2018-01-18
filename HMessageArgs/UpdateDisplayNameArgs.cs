@@ -1,6 +1,6 @@
 ﻿using System;
-using HChatClient.ChatProtos.Networking;
-using HChatClient.ChatProtos.Networking.Messages;
+using ChatProtos.Networking.Messages;
+using HServer.Networking;
 
 namespace HChatClient.HMessageArgs
 {
@@ -9,9 +9,9 @@ namespace HChatClient.HMessageArgs
         public HConnection Connection { get; }
         public HChatEvents Events { get; }
         public ResponseStatus Status { get; }
-        public UpdateDisplayMessageResponse Message { get; }
+        public UpdateDisplayResponse Message { get; }
 
-        public UpdateDisplayNameArgs(HConnection connection, HChatEvents events, ResponseStatus status, UpdateDisplayMessageResponse message)
+        public UpdateDisplayNameArgs(HConnection connection, HChatEvents events, ResponseStatus status, UpdateDisplayResponse message)
         {
             Connection = connection;
             Events = events;

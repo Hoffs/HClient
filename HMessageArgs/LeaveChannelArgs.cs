@@ -1,6 +1,6 @@
 ﻿using System;
-using HChatClient.ChatProtos.Networking;
-using HChatClient.ChatProtos.Networking.Messages;
+using ChatProtos.Networking.Messages;
+using HServer.Networking;
 
 namespace HChatClient.HMessageArgs
 {
@@ -9,10 +9,10 @@ namespace HChatClient.HMessageArgs
         public HConnection Connection { get; }
         public HChatEvents Events { get; }
         public ResponseStatus Status { get; }
-        public LeaveChannelMessageResponse Message { get; }
+        public LeaveChannelResponse Message { get; }
 
         public LeaveChannelArgs(HConnection connection, HChatEvents events, ResponseStatus status,
-            LeaveChannelMessageResponse message)
+            LeaveChannelResponse message)
         {
             Connection = connection;
             Events = events;

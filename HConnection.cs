@@ -79,14 +79,24 @@ namespace HChatClient
         /// </summary>
         /// <param name="message">Byte array of message contents</param>
         /// <returns></returns>
-        public async Task SendAyncTask([NotNull] byte[] message)
+        public async Task<bool> SendAyncTask([NotNull] byte[] message)
         {
-            var packet = new byte[4 + message.Length];
-            Buffer.BlockCopy(BitConverter.GetBytes(message.Length), 0, packet, 0, 4);
-            Buffer.BlockCopy(message, 0, packet, 4, message.Length);
-            await _stream.WriteAsync(packet, 0, packet.Length); // Cancelation token?
-            await _stream.FlushAsync();
-            Console.WriteLine("[Client] Finished sending");
+            try
+            {
+                var packet = new byte[4 + message.Length];
+                Buffer.BlockCopy(BitConverter.GetBytes(message.Length), 0, packet, 0, 4);
+                Buffer.BlockCopy(message, 0, packet, 4, message.Length);
+                await _stream.WriteAsync(packet, 0, packet.Length); // Cancelation token?
+                await _stream.FlushAsync();
+                Console.WriteLine("[Client] Finished sending");
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[CLIENT] Failed to send!");
+                Console.WriteLine(e);
+                return false;
+            }
         }
 
         public async Task CloseTask()

@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using ChatProtos.Networking;
+using ChatProtos.Networking.Messages;
 using Google.Protobuf;
-using HChatClient;
-using HChatClient.ChatProtos.Networking;
-using HChatClient.ChatProtos.Networking.Messages;
-using HChatClient.HCommands;
 using HChatClient.HMessageArgs;
+using HServer.Networking;
 
-namespace ChatClient
+namespace HChatClient.HCommands
 {
     public class JoinChannelCommand : IClientCommand
     {
@@ -24,17 +23,16 @@ namespace ChatClient
 
         public async Task Execute(HChatEvents events, HConnection hConnection)
         {
-            await hConnection.SendAyncTask(new RequestMessage
+            events.JoinChannelEventHandler += joinChannelHandler;
+            var result = await hConnection.SendAyncTask(new RequestMessage
             {
-                Type = RequestType.JoinChannel,
-                Message = new JoinChannelMessageRequest
+                Type = (int)RequestType.JoinChannel,
+                Message = new JoinChannelRequest
                 {
                     ChannelId = _channelId,
-                    ChannelName = _channelId
                 }.ToByteString()
             }.ToByteArray());
-
-            events.JoinChannelEventHandler += joinChannelHandler;
+            if (!result) events.JoinChannelEventHandler -= joinChannelHandler;
         }
 
         private async void joinChannelHandler(object sender, JoinChannelArgs e)

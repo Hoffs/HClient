@@ -1,17 +1,17 @@
 ﻿using System;
-using HChatClient.ChatProtos.Networking;
-using HChatClient.ChatProtos.Networking.Messages;
+using ChatProtos.Networking.Messages;
+using HServer.Networking;
 
 namespace HChatClient.HMessageArgs
 {
     public class LogoutArgs : EventArgs
     {
-        public LogoutMessageResponse Message { get; }
+        public LogoutResponse Message { get; }
         public ResponseStatus Status { get; }
         public HChatEvents Events { get; }
         public HConnection Connection { get; }
 
-        public LogoutArgs(HConnection connection, HChatEvents events, ResponseStatus status, LogoutMessageResponse message)
+        public LogoutArgs(HConnection connection, HChatEvents events, ResponseStatus status, LogoutResponse message)
         {
             Connection = connection;
             Events = events;

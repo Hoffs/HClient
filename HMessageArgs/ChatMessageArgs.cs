@@ -1,6 +1,6 @@
 ﻿using System;
-using HChatClient.ChatProtos.Networking;
-using HChatClient.ChatProtos.Networking.Messages;
+using ChatProtos.Networking.Messages;
+using HServer.Networking;
 
 namespace HChatClient.HMessageArgs
 {

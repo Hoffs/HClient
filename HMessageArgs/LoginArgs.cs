@@ -1,17 +1,17 @@
 ﻿using System;
-using HChatClient.ChatProtos.Networking;
-using HChatClient.ChatProtos.Networking.Messages;
+using ChatProtos.Networking.Messages;
+using HServer.Networking;
 
 namespace HChatClient.HMessageArgs
 {
     public class LoginArgs : EventArgs
     {
-        public LoginMessageResponse Message { get; }
+        public LoginResponse Message { get; }
         public ResponseStatus Status { get; }
         public HChatEvents Events { get; }
         public HConnection Connection { get; }
 
-        public LoginArgs(HConnection connection, HChatEvents events, ResponseStatus status, LoginMessageResponse message)
+        public LoginArgs(HConnection connection, HChatEvents events, ResponseStatus status, LoginResponse message)
         {
             Connection = connection;
             Events = events;

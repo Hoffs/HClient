@@ -1,6 +1,6 @@
 ﻿using System;
-using HChatClient.ChatProtos.Networking;
-using HChatClient.ChatProtos.Networking.Messages;
+using ChatProtos.Networking.Messages;
+using HServer.Networking;
 
 namespace HChatClient.HMessageArgs
 {
@@ -9,9 +9,9 @@ namespace HChatClient.HMessageArgs
         public HConnection Connection { get; }
         public HChatEvents Events { get; }
         public ResponseStatus Status { get; }
-        public RemoveRoleMessageResponse Message { get; }
+        public RemoveRoleResponse Message { get; }
 
-        public RemoveRoleArgs(HConnection connection, HChatEvents events, ResponseStatus status, RemoveRoleMessageResponse message)
+        public RemoveRoleArgs(HConnection connection, HChatEvents events, ResponseStatus status, RemoveRoleResponse message)
         {
             Connection = connection;
             Events = events;
