@@ -14,7 +14,7 @@ namespace HChatClient.HCommands
         private readonly BlockingCollection<Guid> _list;
         private readonly string _channelId;
 
-        // TODO: Actually add the ChannelManager to add channel to joined channel list on JoinChannel handler.
+        // TODO: Actually add the ChannelManager to add channel to joined channel sist on JoinChannel handler.
         public JoinChannelCommand(BlockingCollection<Guid> list, string channelId)
         {
             _list = list;
@@ -42,11 +42,11 @@ namespace HChatClient.HCommands
                 Console.WriteLine("Joined channel");
                 _list.TryAdd(Guid.Parse(e.Message.ChannelId));
                 e.Events.JoinChannelEventHandler -= joinChannelHandler;
-            } else if (e.Message.ChannelId == _channelId)
+            }
+            else if (e.Message.ChannelId == _channelId)
             {
                 e.Events.JoinChannelEventHandler -= joinChannelHandler;
             }
-
         }
     }
 }

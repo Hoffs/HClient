@@ -29,7 +29,7 @@ namespace HChatClient
             try
             {
                 var responseMessage = ResponseMessage.Parser.ParseFrom(message);
-                switch ((RequestType) responseMessage.Type)
+                switch ((RequestType)responseMessage.Type)
                 {
                     case RequestType.Login:
                         var login = LoginResponse.Parser.ParseFrom(responseMessage.Message);
@@ -42,13 +42,13 @@ namespace HChatClient
                     case RequestType.JoinChannel:
                         Console.WriteLine("[CLIENT] Handler count: {0}", JoinChannelEventHandler?.GetInvocationList().Length);
                         var joinChannel = JoinChannelResponse.Parser.ParseFrom(responseMessage.Message);
-                        OnJoinChannelEventHandler(new JoinChannelArgs(client.GetConnection(), this, responseMessage.Status,
-                            joinChannel));
+                        OnJoinChannelEventHandler(
+                            new JoinChannelArgs(client.GetConnection(), this, responseMessage.Status, joinChannel));
                         break;
                     case RequestType.LeaveChannel:
                         var leaveChannel = LeaveChannelResponse.Parser.ParseFrom(responseMessage.Message);
-                        OnLeaveChannelEventHandler(new LeaveChannelArgs(client.GetConnection(), this, responseMessage.Status,
-                            leaveChannel));
+                        OnLeaveChannelEventHandler(
+                            new LeaveChannelArgs(client.GetConnection(), this, responseMessage.Status, leaveChannel));
                         break;
                     case RequestType.BanUser:
                         var banUser = BanUserResponse.Parser.ParseFrom(responseMessage.Message);
@@ -56,8 +56,8 @@ namespace HChatClient
                         break;
                     case RequestType.KickUser:
                         var kickUser = KickUserResponse.Parser.ParseFrom(responseMessage.Message);
-                        OnKickUserEventHandler(new KickUserArgs(client.GetConnection(), this, responseMessage.Status,
-                            kickUser));
+                        OnKickUserEventHandler(
+                            new KickUserArgs(client.GetConnection(), this, responseMessage.Status, kickUser));
                         break;
                     case RequestType.AddRole:
                         var addRole = AddRoleResponse.Parser.ParseFrom(responseMessage.Message);
@@ -65,18 +65,22 @@ namespace HChatClient
                         break;
                     case RequestType.RemoveRole:
                         var removeRole = RemoveRoleResponse.Parser.ParseFrom(responseMessage.Message);
-                        OnRemoveRoleEventHandler(new RemoveRoleArgs(client.GetConnection(), this, responseMessage.Status,
-                            removeRole));
+                        OnRemoveRoleEventHandler(
+                            new RemoveRoleArgs(client.GetConnection(), this, responseMessage.Status, removeRole));
                         break;
                     case RequestType.UpdateDisplayName:
                         var updateDisplayName = UpdateDisplayResponse.Parser.ParseFrom(responseMessage.Message);
-                        OnUpdateDisplayNamEventHandler(new UpdateDisplayNameArgs(client.GetConnection(), this,
-                            responseMessage.Status, updateDisplayName));
+                        OnUpdateDisplayNamEventHandler(
+                            new UpdateDisplayNameArgs(
+                                client.GetConnection(),
+                                this,
+                                responseMessage.Status,
+                                updateDisplayName));
                         break;
                     case RequestType.UserInfo:
                         var userInfo = UserInfoResponse.Parser.ParseFrom(responseMessage.Message);
-                        OnUserInfoEventHandler(new UserInfoArgs(client.GetConnection(), this, responseMessage.Status,
-                            userInfo));
+                        OnUserInfoEventHandler(
+                            new UserInfoArgs(client.GetConnection(), this, responseMessage.Status, userInfo));
                         break;
                     case RequestType.ChatMessage:
                         break;
@@ -89,14 +93,15 @@ namespace HChatClient
                 Console.WriteLine("Couldn't parse Protobuf message");
                 Console.WriteLine(ex);
             }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                Console.WriteLine("No such request type");
-                Console.WriteLine(ex);
-            }
 
         }
 
+        /// <summary>
+        /// Method to be called on Login Event.
+        /// </summary>
+        /// <param name="e">
+        /// The login arguments.
+        /// </param>
         protected virtual void OnLoginEventHandler(LoginArgs e)
         {
             LoginEventHandler?.Invoke(this, e);
